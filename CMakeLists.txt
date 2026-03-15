@@ -56,8 +56,17 @@ else()
     add_compile_definitions(USE_QT5)
 endif()
 
+set(ABSL_LOG_TARGET "")
 if(UNIX)
     find_package(absl CONFIG REQUIRED)
+    if(TARGET absl::log_initialize)
+        set(ABSL_LOG_TARGET absl::log_initialize)
+        add_compile_definitions(RELOPUSH_USE_ABSL_LOG=1)
+    else()
+        add_library(relopush_absl_log_stub INTERFACE)
+        target_compile_definitions(relopush_absl_log_stub INTERFACE RELOPUSH_USE_ABSL_LOG=0)
+        set(ABSL_LOG_TARGET relopush_absl_log_stub)
+    endif()
 endif()
 
 
@@ -109,7 +118,7 @@ if(APPLE)
     link_directories(${ODE_DIR}/lib)
 endif()
 
-add_executable(ReloPush-BOSS src/main.cpp
+add_executable(ReloPush_exe src/main.cpp
     src/GraphBuilder.cpp
     src/InputParser.cpp
     src/DubinsTools.cpp
@@ -134,9 +143,9 @@ add_executable(ReloPush-BOSS src/main.cpp
     src/base64.cpp
 )
 if(APPLE)
-    target_link_libraries(ReloPush-BOSS ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${ZMQ_LIB} Ceres::ceres ${ODE_DIR}/lib/libode.dylib)
+    target_link_libraries(ReloPush_exe ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${ZMQ_LIB} Ceres::ceres ${ODE_DIR}/lib/libode.dylib)
 else()
-    target_link_libraries(ReloPush-BOSS ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${CERES_LIBRARIES} ${ZeroMQ_LIBRARIES} absl::log_initialize)
+    target_link_libraries(ReloPush_exe ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${CERES_LIBRARIES} ${ZeroMQ_LIBRARIES} ${ABSL_LOG_TARGET})
 endif()
 
 # Dubins Path Planning
@@ -144,7 +153,7 @@ add_executable(test_dubins test/test_dubins.cpp)
 if(APPLE)
     target_link_libraries(test_dubins ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${ODE_DIR}/lib/libode.dylib)
 else()
-    target_link_libraries(test_dubins ${OMPL_LIBRARIES} ${Boost_LIBRARIES} absl::log_initialize)
+    target_link_libraries(test_dubins ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${ABSL_LOG_TARGET})
 endif()
 
 # Hybrid Astar Planning
@@ -157,7 +166,7 @@ add_executable(test_hybrid_astar test/test_hybrid_astar.cpp
 if(APPLE)
     target_link_libraries(test_hybrid_astar ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${ODE_DIR}/lib/libode.dylib ${QT_WIDGET_TARGET})
 else()
-    target_link_libraries(test_hybrid_astar ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${QT_WIDGET_TARGET} absl::log_initialize)
+    target_link_libraries(test_hybrid_astar ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${QT_WIDGET_TARGET} ${ABSL_LOG_TARGET})
 endif()
 
 # Pre-relocation Optimization
@@ -165,7 +174,7 @@ add_executable(test_prerelo_opt test/test_prerelo_optimization.cpp src/PreReloOp
 if(APPLE)
     target_link_libraries(test_prerelo_opt Ceres::ceres ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${ODE_DIR}/lib/libode.dylib)
 else()
-     target_link_libraries(test_prerelo_opt ${CERES_LIBRARIES} ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} absl::log_initialize)
+     target_link_libraries(test_prerelo_opt ${CERES_LIBRARIES} ${Boost_LIBRARIES} ${OMPL_LIBRARIES} ${Eigen_LIBRARIES} ${ABSL_LOG_TARGET})
 endif()
 
 add_executable(test_parse_instance
@@ -192,7 +201,7 @@ add_executable(test_parse_instance
 if(APPLE)
     target_link_libraries(test_parse_instance ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${Eigen_LIBRARIES} ${ODE_DIR}/lib/libode.dylib ${QT_WIDGET_TARGET} Ceres::ceres)
 else()
-    target_link_libraries(test_parse_instance ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${CERES_LIBRARIES} absl::log_initialize)
+    target_link_libraries(test_parse_instance ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${Eigen_LIBRARIES} ${QT_WIDGET_TARGET} ${CERES_LIBRARIES} ${ABSL_LOG_TARGET})
 endif()
 
 add_executable(test_trajectory_gen test/test_trajectory_gen.cpp)
@@ -212,7 +221,7 @@ endif()
 
 
 include(GNUInstallDirs)
-install(TARGETS ReloPush-BOSS
+install(TARGETS ReloPush_exe
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

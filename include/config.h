@@ -6,6 +6,6 @@
 #define PROJECT_NAME ReloPush-Rebuild //project name will be written here
 
 #define STR(x) #x //for stringizing
-#define CMAKE_SOURCE_DIR STR(/Users/jeeho/InSync/UMich/Fluent_ws/ReloPush_ws/ReloPush_src) //cmake source dir will be written here
+#define CMAKE_SOURCE_DIR STR(/mnt/c/Users/Jeffrey Chen/Desktop/NL-2-Actions/ReloPush) //cmake source dir will be written here
 
 #endif // CONFIG_H_IN

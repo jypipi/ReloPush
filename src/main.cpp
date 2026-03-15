@@ -14,8 +14,8 @@
 #ifdef __APPLE__
 // Include the glog header when compiling on MacOS.
     #include <glog/logging.h>
-#else
-// Otherwise, include the Abseil logging header.
+#elif RELOPUSH_USE_ABSL_LOG
+// Otherwise, include the Abseil logging header when available.
     #include "absl/log/initialize.h"
 #endif
 
@@ -132,8 +132,8 @@ int main(int argc, char *argv[])
     #ifdef __APPLE__
         // For macOS, initialize Google Logging with the program name.
         google::InitGoogleLogging(argv[0]);
-    #else
-        // For non-macOS systems, initialize Abseil Logging.
+    #elif RELOPUSH_USE_ABSL_LOG
+        // For non-macOS systems, initialize Abseil Logging when available.
         absl::InitializeLog();
     #endif
     QApplication app(argc, argv);
