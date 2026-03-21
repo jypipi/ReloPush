@@ -126,9 +126,14 @@ namespace ReloPush{
             auto orientation_length = computeLocalOrientation(xc, yc, T(R_));
             T th1pc = orientation_length.th1pc;
             T straight_arc_length = orientation_length.path_length;
-            // If th1pc is NaN => cost = 10 (like your MATLAB code).
-            // Ceres doesn't gracefully handle comparisons to NaN, so we do a check:
-            if (ceres::isnan(th1pc)) {
+
+            // // If th1pc is NaN => cost = 10 (like your MATLAB code).
+            // // Ceres doesn't gracefully handle comparisons to NaN, so we do a check:
+            // if (ceres::isnan(th1pc)) {
+
+            // If th1pc is NaN => penalize this sample.
+            // Use self-inequality check instead of ceres::isnan for wider Ceres compatibility.
+            if (th1pc != th1pc) {
                 residual[0] = T(100.0);
                 //return false;
                 return true;
