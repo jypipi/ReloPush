@@ -1,5 +1,0 @@
-<!-- -*- mode: XML -*- -->
-<launch>
-    <node pkg="relopush_ros_bridge" type="relopush_ros_bridge" name="relopush_ros_bridge">
-    </node>
-</launch>
