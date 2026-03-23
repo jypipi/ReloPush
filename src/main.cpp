@@ -2,6 +2,7 @@
 #include "InputParser.hpp"
 #include <batchInstanceParcer.hpp>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <PlanningContext.hpp>
 #include <FileWriter.hpp>
@@ -9,6 +10,7 @@
 #include <Visualization/VisualizeResults.h>
 #include <chrono>
 #include <thread>
+#include <cstddef>
 #include <trajectory.hpp>
 #include <array>
 #ifdef __APPLE__
@@ -162,6 +164,25 @@ int main(int argc, char *argv[])
         handle_args(argc, argv, filename, instance_ind, use_opt, no_init_guess, use_dfs); // 3rd arg: mode. 'f'=ReloPush-F 'd' = ReloPush-D 'u'=no-init-opt 'o'=ReloPush
         vis = false; // disable for evaluations
     }
+
+    // argv[4]: plan_only | real | sim (matches NL_2_Actions.py / readme). Enables ZMQ trajectory send when not planOnly.
+    if (argc > 4) {
+        std::string run_mode = argv[4];
+        if (run_mode == "real") {
+            sim = planningSimOrReal::real;
+        } else if (run_mode == "sim") {
+            sim = planningSimOrReal::sim;
+        } else if (run_mode == "plan_only") {
+            sim = planningSimOrReal::planOnly;
+        } else {
+            std::cerr << "[ReloPush] Unknown argv[4] run mode '" << run_mode
+                      << "' (expected plan_only|real|sim). Using planOnly." << std::endl;
+        }
+    }
+    std::cout << "[ReloPush] Execution mode (argv[4]): "
+              << (sim == planningSimOrReal::planOnly ? "plan_only"
+                  : (sim == planningSimOrReal::sim ? "sim" : "real"))
+              << std::endl;
 
     Color::println("\n=== " + filename + " ind: " + std::to_string(instance_ind) + " ===",Color::GREEN);
     Color::println("Use Optimized PreRelocation? " + std::to_string(use_opt),Color::YELLOW);
@@ -413,10 +434,22 @@ int main(int argc, char *argv[])
     {
         auto s = finalTrajectory.serialize();
         std::string encoded_data = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
-        //for debug
-        //std::cout << encoded_data.size() << std::endl;
+        // Confirm trajectory publish over ZMQ (base64 string is what the ROS bridge receives).
+        std::cout << "[ReloPush] Publishing trajectory via ZeroMQ (REQ -> bridge REP on :5555)\n"
+                  << "  raw serialized trajectory bytes: " << s.size() << "\n"
+                  << "  base64 string length (published): " << encoded_data.size() << std::endl;
+        const std::size_t kPreviewChars = 512;
+        std::cout << "[ReloPush] base64 trajectory string";
+        if (encoded_data.size() <= kPreviewChars) {
+            std::cout << ":\n" << encoded_data << std::endl;
+        } else {
+            std::cout << " (preview, first " << kPreviewChars << " chars):\n"
+                      << encoded_data.substr(0, kPreviewChars) << "\n... [truncated]\n";
+        }
+        std::cout << std::flush;
+
         auto res = mqClient.send_and_wait(encoded_data);
-        //std::cout << res << std::endl; // response from server
+        std::cout << "[ReloPush] ZMQ reply from bridge: " << res << std::endl << std::flush;
     }
 
     return app.exec();

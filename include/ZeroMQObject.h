@@ -31,7 +31,8 @@ public:
         zmq::message_t request(msg_str.size());
         memcpy(request.data(), msg_str.c_str(), msg_str.size());
 
-        std::cout << "Sending message: " << msg_str << std::endl;
+        // Avoid dumping huge base64 trajectories to the terminal; main.cpp prints a preview for trajectory.
+        std::cout << "[ReloPush ZMQ] Sending payload, bytes=" << msg_str.size() << std::endl;
 
         // Send the message.
         socket.send(request, zmq::send_flags::none);

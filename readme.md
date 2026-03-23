@@ -33,9 +33,13 @@ After building the CMake project, run `ReloPush-BOSS` binary with the following 
 # arg1: instance file name in input folder
 # arg2: instance index in the file
 # arg3: mode (f: ReloPush-BOSS, u: ReloPush-BO, d: ReloPush-B, o: ReloPush)
+# arg4 (optional): plan_only | sim | real — controls ZeroMQ trajectory publish after planning (NL_2_Actions passes this as the 5th argument)
 
 # example run (with ReloPush-BOSS, 10 objects, index 0)
 ./ReloPush-BOSS ReloPush-BOSS_10_objects.txt 0 f
+
+# send trajectory over ZeroMQ to the ROS bridge (requires bridge listening on tcp://*:5555)
+./ReloPush_exe ReloPush-BOSS_10_objects.txt 0 o real
 ```
 
 Alternatively, when the binary is started without an argument, it will use hard-coded planning context (shown on the top of the main function).
