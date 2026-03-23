@@ -5,7 +5,7 @@ smooth control, proper termination, current reference pose visualization,
 delay compensation, velocity scaling, and an additional cost for lateral error (staying on track).
 
 This node subscribes to:
-  - /mushr2/car_pose (geometry_msgs/PoseStamped)
+  - /natnet_ros/mushr2/pose (geometry_msgs/PoseStamped)
   - /mushr2/relopush/serialized_trajectory (std_msgs/String)
 
 It publishes:
@@ -75,7 +75,7 @@ class MPCControllerNode(object):
         self.vel_scale_back = rospy.get_param("~vel_scale_back", 0.9) #0.8
 
         # --- State and reference trajectory ---
-        self.current_pose = None         # Latest pose from /mushr2/car_pose
+        self.current_pose = None         # Latest pose from /natnet_ros/mushr2/pose
         self.current_yaw  = 0.0           # Latest heading (radians)
         # Reference trajectory stored as a NumPy array with shape (N, 5):
         # [x, y, yaw, time, ref_vel]
@@ -95,7 +95,7 @@ class MPCControllerNode(object):
                                                PoseStamped, queue_size=10)
 
         # --- Subscribers ---
-        rospy.Subscriber("/mushr2/car_pose", PoseStamped, self.cb_pose)
+        rospy.Subscriber("/natnet_ros/mushr2/pose", PoseStamped, self.cb_pose)
         rospy.Subscriber("/mushr2/relopush/serialized_trajectory", String, self.cb_traj)
 
         # --- Other Publishers ---
