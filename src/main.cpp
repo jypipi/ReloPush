@@ -443,9 +443,9 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
     // send trajectory
-    std::cout << "[ReloPush] Sending trajectory via ZeroMQ..." << std::endl;
     if(sim!=planningSimOrReal::planOnly)
     {
+        std::cout << "[ReloPush] Sending trajectory via ZeroMQ..." << std::endl;
         auto s = finalTrajectory.serialize();
         std::string encoded_data = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
         // Confirm trajectory publish over ZMQ (base64 string is what the ROS bridge receives).
