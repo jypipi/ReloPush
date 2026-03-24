@@ -192,20 +192,24 @@ int main(int argc, char *argv[])
     // send via zeromq
     zeromp_object mqClient;
     #ifdef __APPLE__
-            // For macOS, initialize Google Logging with the program name.
+        // For macOS, initialize Google Logging with the program name.
         mqClient.connect("tcp://192.168.1.13:5555");
-    std::cout << "APPLE" << std::endl;
+        std::cout << "APPLE" << std::endl;
     #else
-            // For non-macOS systems, initialize Abseil Logging.
+        // For non-macOS systems, initialize Abseil Logging.
         mqClient.connect();
     #endif
+    std::cout << "[ReloPush] ZeroMQ client connected" << std::endl;
 
+    // send robot initial pose for visualization
     if(sim!=planningSimOrReal::real)
     {
         // init robot init pose
+        std::cout << "[Not-Real Mode] Generating robot initial pose message..." << std::endl;
         ReloPush::trajectory_elem robot(robots[0].x,robots[0].y,robots[0].yaw,-1,-1,false);
         auto robot_str = "r!!!"+robot.serialize();
         std::string encoded_data_robot = base64_encode(reinterpret_cast<const unsigned char*>(robot_str.c_str()), robot_str.length());
+        std::cout << "[Not-Real Mode] initial pose message: " << robot_str << " -> " << encoded_data_robot.size() << " bytes" << std::endl;
         if(sim == planningSimOrReal::sim)
         {
             mqClient.send_and_wait(encoded_data_robot); //todo: gen message properly
@@ -213,18 +217,21 @@ int main(int argc, char *argv[])
     }
     else // real robot. get pose from ros bridge
     {
+        std::cout << "[Real Mode] Sending request for robot initial pose..." << std::endl;
         auto req = std::string("l!!!");
         auto req_msg = base64_encode(reinterpret_cast<const unsigned char*>(req.c_str()), req.length());
         auto r_str = mqClient.send_and_wait(req_msg);
+        std::cout << "[Real Mode] Received robot initial pose message" << std::endl;
         auto r_dec = base64_decode(r_str,false);
         auto robot = ReloPush::trajectory_elem(r_dec);
         // For now, assume there is only one robot
         robots[0].x = robot.x;
         robots[0].y = robot.y;
         robots[0].yaw = robot.yaw;
-        std::cout << "Robot at: " << robot.x << ", " << robot.y << ", " << robot.yaw << std::endl;
+        std::cout << "[Real Mode] Robot initial pose: " << robot.x << ", " << robot.y << ", " << robot.yaw << std::endl;
     }
 
+    // send objects and goals for visualization
     if(sim!=planningSimOrReal::planOnly)
     {
         // send objects for vis
@@ -275,6 +282,7 @@ int main(int argc, char *argv[])
     }
 
 
+    std::cout << "[ReloPush] Starting planning..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     // 2) Perform the main planning/allocation loop
@@ -297,7 +305,8 @@ int main(int argc, char *argv[])
 
     // Calculate the elapsed time in milliseconds
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "Elapsed time: " << duration.count() << " ms" << std::endl;
+    std::cout << "[ReloPush] Planning completed" << std::endl;
+    std::cout << "[ReloPush] Elapsed time: " << duration.count() << " ms" << std::endl;
 
     bool timeout = false;
     if(duration.count() > 120000)
@@ -312,11 +321,13 @@ int main(int argc, char *argv[])
     if(ok)
     {
         // 3) Print the final sequence
+        std::cout << "[ReloPush] Final sequence: " << std::endl;
         printFinalSequence(finalSequence);
 
         // 4) Visualization
         if (!finalSequence.empty() && vis)
         {
+            std::cout << "[ReloPush] Visualizing results..." << std::endl;
            visualizeResults(finalSequence, app);
         }
 
@@ -355,9 +366,9 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "=== Solution Summary ===" << std::endl;
-    std::cout << "Total path length (all movements): " << total_path_length << std::endl;
-    std::cout << "Total pushing length: " << total_pushing_length << std::endl;
-    std::cout << "Planning time(s): " << (float)duration.count()/1000 << std::endl;
+    std::cout << "[ReloPush] Total path length (all movements): " << total_path_length << std::endl;
+    std::cout << "[ReloPush] Total pushing length: " << total_pushing_length << std::endl;
+    std::cout << "[ReloPush] Planning time(s): " << (float)duration.count()/1000 << std::endl;
 
 
     int n_obsRelo=0;
@@ -382,7 +393,7 @@ int main(int argc, char *argv[])
             result_filename = std::string(CMAKE_SOURCE_DIR) + "/results/result_opt_no_init_" + filename;
     }
 
-    std::cout << "saving to: "<< result_filename << std::endl;
+    std::cout << "[ReloPush] Saving results to: "<< result_filename << std::endl;
 
     // Open for appending (if you run many instances), or for writing (overwrite)
     std::ofstream outfile(result_filename.c_str(), std::ios::app);
@@ -399,23 +410,25 @@ int main(int argc, char *argv[])
 
 
     // generate resulting trajectory
+    std::cout << "[ReloPush] Generating resulting trajectory..." << std::endl;
     auto finalTrajectory = FA2Trajectory(finalSequence);
 
 
-   //  auto actions = extractActionSequence(finalSequence);
-   // for (const auto& act : actions) {
-   //     std::cout << "[" << act.action_type
-   //               << "," << act.object_name
-   //               << "," << act.goal_name
-   //               << "," << act.x
-   //               << "," << act.y
-   //               << "," << act.yaw << "],\n"<< std::flush;;
-   // }
+    // auto actions = extractActionSequence(finalSequence);
+//    for (const auto& act : actions) {
+//        std::cout << "[" << act.action_type
+//                  << "," << act.object_name
+//                  << "," << act.goal_name
+//                  << "," << act.x
+//                  << "," << act.y
+//                  << "," << act.yaw << "],\n"<< std::flush;;
+//    }
 
-    //finalTrajectory.print();
+    // finalTrajectory.print();
 
     // save_actions_for_visualizer(finalSequence,std::string(CMAKE_SOURCE_DIR) + "/result_actions_" + filename);
 
+    std::cout << "[ReloPush] Visualizing trajectory..." << std::endl;
     //QApplication app(argc, argv);
     QMainWindow window;
     window.setWindowTitle("Trajectory Visualization (Arrow Format)");
@@ -430,6 +443,7 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
     // send trajectory
+    std::cout << "[ReloPush] Sending trajectory via ZeroMQ..." << std::endl;
     if(sim!=planningSimOrReal::planOnly)
     {
         auto s = finalTrajectory.serialize();

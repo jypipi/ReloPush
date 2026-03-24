@@ -5,3 +5,4 @@ src/main2.cpp
 src/main_old.cpp
 log/*
 input/tests/*
+include/config.h
