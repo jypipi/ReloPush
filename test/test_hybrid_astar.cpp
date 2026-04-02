@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     //float workspace_width = 4.0f;
     //float workspace_height = 5.0f;
     float workspace_width = 4.0f;
-    float workspace_height = 5.2f;
+    float workspace_height = 4.0f;
 
     WorkspaceBoundary boundary(workspace_width,workspace_height);
     PlanningParameters params;   //?inspect

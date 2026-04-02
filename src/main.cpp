@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     planningSimOrReal sim = planningSimOrReal::planOnly;
 
     // Data to parse
-    WorkspaceBoundary boundary(4,5.2); // todo: parse from file
+    WorkspaceBoundary boundary(4,4); // todo: parse from file
     ObjectMap objects, goals;
     //std::unordered_map<std::string, ObjectInfo>   goals;
     std::unordered_map<std::string, ObjectGoalPair> objGoalPairs;

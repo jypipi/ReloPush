@@ -46,12 +46,12 @@ objects = [
     {'name': 'd1', 'x': 0.5892226696014404, 'y': 3.4944525228271484, 'theta': 0.7799423336982727},
 ]
 
-# Boundary data (4m x 5.2m rectangle)
+# Boundary data (4m x 4m rectangle)
 boundary_corners = [
     (0, 0),
     (4, 0),
-    (4, 5.2),
-    (0, 5.2)
+    (4, 4),
+    (0, 4)
 ]
 
 # Create figure and axis

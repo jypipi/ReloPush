@@ -90,7 +90,7 @@ objects = [
 ]
 
 # Boundary of the workspace
-boundary_corners = [(0, 0), (4, 0), (4, 5.2), (0, 5.2)]
+boundary_corners = [(0, 0), (4, 0), (4, 4), (0, 4)]
 
 # Goal pose data
 goal_x = 2.4541770761155917

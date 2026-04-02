@@ -1138,7 +1138,7 @@ public:
         };
 
         // todo: get it as input param
-        double xMin = 0, yMin = 0, xMax = 4.0, yMax = 5.2;
+        double xMin = 0, yMin = 0, xMax = 4.0, yMax = 4.0;
 
         // Check boundary
         for (const auto& corner : corners) {

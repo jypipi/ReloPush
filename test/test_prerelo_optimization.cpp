@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
     double R     = 1.9188; // turning radius
     */
 
-    WorkspaceBoundary ws(4,5.2); // workspace boundary (x_max, y_max)
+    WorkspaceBoundary ws(4,4); // workspace boundary (x_max, y_max)
 
     // 2) The parameter block: [x1, y1]
     //    We'll let Ceres find an optimal x1,y1 that minimize the cost.

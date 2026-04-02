@@ -7,3 +7,4 @@ log/*
 input/tests/*
 include/config.h
 results/*
+input/ReloPush_NL2Actions_Plan.txt

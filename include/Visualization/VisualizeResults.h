@@ -36,7 +36,7 @@ void visualizeResults(std::vector<FinalAllocation> &finalSequence,
 
     // Define workspace size (example)
     float workspace_width  = 4.0f;
-    float workspace_height = 5.2f;
+    float workspace_height = 4.0f;
 
     // We store windows in a vector so they won't go out of scope
     // before the Qt event loop (`app.exec()`) finishes.
