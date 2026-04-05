@@ -209,26 +209,29 @@ int main(int argc, char *argv[])
         ReloPush::trajectory_elem robot(robots[0].x,robots[0].y,robots[0].yaw,-1,-1,false);
         auto robot_str = "r!!!"+robot.serialize();
         std::string encoded_data_robot = base64_encode(reinterpret_cast<const unsigned char*>(robot_str.c_str()), robot_str.length());
-        std::cout << "[Not-Real Mode] initial pose message: " << robot_str << " -> " << encoded_data_robot.size() << " bytes" << std::endl;
+        std::cout << "[Not-Real Mode] Robot initial pose: " << robots[0].x << ", " << robots[0].y << ", " << robots[0].yaw << std::endl;
         if(sim == planningSimOrReal::sim)
         {
             mqClient.send_and_wait(encoded_data_robot); //todo: gen message properly
         }
     }
-    else // real robot. get pose from ros bridge
+    else // Robot and object poses come from the input .txt in real mode.
     {
-        std::cout << "[Real Mode] Sending request for robot initial pose..." << std::endl;
-        auto req = std::string("l!!!");
-        auto req_msg = base64_encode(reinterpret_cast<const unsigned char*>(req.c_str()), req.length());
-        auto r_str = mqClient.send_and_wait(req_msg);
-        std::cout << "[Real Mode] Received robot initial pose message" << std::endl;
-        auto r_dec = base64_decode(r_str,false);
-        auto robot = ReloPush::trajectory_elem(r_dec);
-        // For now, assume there is only one robot
-        robots[0].x = robot.x;
-        robots[0].y = robot.y;
-        robots[0].yaw = robot.yaw;
-        std::cout << "[Real Mode] Robot initial pose: " << robot.x << ", " << robot.y << ", " << robot.yaw << std::endl;
+        // std::cout << "[Real Mode] Sending request for robot initial pose..." << std::endl;
+        // auto req = std::string("l!!!");
+        // auto req_msg = base64_encode(reinterpret_cast<const unsigned char*>(req.c_str()), req.length());
+        // auto r_str = mqClient.send_and_wait(req_msg);
+        // std::cout << "[Real Mode] Received robot initial pose message" << std::endl;
+        // auto r_dec = base64_decode(r_str,false);
+        // auto robot = ReloPush::trajectory_elem(r_dec);
+        // // For now, assume there is only one robot
+        // robots[0].x = robot.x;
+        // robots[0].y = robot.y;
+        // robots[0].yaw = robot.yaw;
+        // std::cout << "[Real Mode] Robot initial pose: " << robot.x << ", " << robot.y << ", " << robot.yaw << std::endl;
+
+        // Real mode: robot pose from input file (same as planning). No ROS/ZMQ fetch of pose here.
+        std::cout << "[Real Mode] Robot initial pose: " << robots[0].x << ", " << robots[0].y << ", " << robots[0].yaw << std::endl;
     }
 
     // send objects and goals for visualization
